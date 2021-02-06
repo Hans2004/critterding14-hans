@@ -1,0 +1,98 @@
+name: critterding14-hans
+base: core18
+confinement: strict
+grade: stable
+version: beta14.0
+summary: Evolving Artificial Life
+description: Critterding is a "Petri dish" universe in 3D that demonstrates evolving artificial life. Critters start out with completely random brains and bodies, but will automatically start evolving into something with much better survival skills.
+license: LGPL-2.0
+
+apps:
+  critterding:
+    command: usr/bin/critterding
+    environment:
+      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/mesa:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/mesa-gl:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/xorg:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio/:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/caca:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/engines-1.1:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gio:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/glib-2.0:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/krb5:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt4:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt-default:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt4/plugins/imageformats:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt4/plugins
+      LIBGL_DRIVERS_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri
+      DISABLE_WAYLAND: 1
+      QT_PLUGIN_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt4/plugins/"
+    plugs:
+      - home
+      - network
+      - opengl
+      - removable-media
+      - unity7
+      - x11
+      - wayland
+      - desktop
+      - desktop-legacy
+parts:
+  patches:
+    source: patches/
+    plugin: dump
+    prime: [-*]
+    stage: [patchfile.patch]
+  desktop:
+    plugin: cmake
+    source: https://sourceforge.net/projects/critterding/files/critterding/sources/critterding-beta14.tar.bz2
+#    source: critterding-beta14-compressed.tar.bz2
+#    source: critterding-beta14
+    configflags: [-DCMAKE_BUILD_TYPE=Debug, -DCMAKE_INSTALL_PREFIX=/usr]
+    build-environment:
+      - CFLAGS: "$CFLAGS -march=native -Ofast"
+    after: [patches]
+    override-build: |
+      cd $SNAPCRAFT_PART_SRC
+      patch -p1 < $SNAPCRAFT_STAGE/patchfile.patch
+      snapcraftctl build
+    override-prime: |
+      snapcraftctl prime
+      cat << EOF > usr/share/applications/critterding14.desktop
+      [Desktop Entry]
+      Name=Critterding14
+      GenericName=Evolving Artificial Life
+      Comment=Petri dish universe in 3D that demonstrates evolving artificial life
+      Exec=critterding
+      #Icon=/usr/share/icons/hicolor/22x22/apps/critterding.png
+      StartupNotify=true
+      Terminal=false
+      Type=Application
+      Categories=Education;Science;
+      EOF
+    build-packages:
+      - gcc
+      - bzip2
+      - libsdl1.2-dev
+      - libqt4-dev
+      - libqt4-opengl-dev
+      - libfreetype6-dev
+      - libboost-dev
+      - libboost-iostreams-dev
+      - libboost-filesystem-dev
+      - libboost-thread-dev
+      - libsdl-image1.2-dev
+      - freeglut3-dev
+      - libpng-dev
+      - libjpeg-dev
+      - zlib1g-dev
+      - libqtgui4
+      - libqtcore4
+
+    stage-packages:
+      - qt4-default
+      - libfreetype6
+      - bzip2
+      - libsdl1.2debian
+      - libsdl-image1.2
+      - libboost-iostreams1.65.1
+      - libboost-filesystem1.65.1
+      - libboost-thread1.65.1
+      - libgl1
+      - libglu1-mesa
+      - libqt4-opengl
+      - libgl1-mesa-dri
+      - mesa-va-drivers
+      - libqtgui4
+      - libqtcore4
+      - freeglut3
+      - libgomp1
+      - libslang2
