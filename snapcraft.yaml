@@ -46,6 +46,7 @@ parts:
       snapcraftctl build
     override-prime: |
       snapcraftctl prime
+      mkdir usr/share/applications
       cat << EOF > usr/share/applications/critterding14.desktop
       [Desktop Entry]
       Name=Critterding14
